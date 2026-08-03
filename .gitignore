@@ -1,2 +1,16 @@
 deploy-companion/
 .DS_Store
+
+# Develop-phase companion / course scaffolding — not the product
+.claude/
+03_DEVELOP.md
+AGENTS.md
+CLAUDE.md
+CLAUDE_CODE_SETUP_GUIDE.md
+DEBUGGING_GUIDE.md
+DEVELOP_PRD_TEMPLATE.md
+NORTHSTAR_HOME_EXAMPLE.md
+PATH_B_STRETCH.md
+PROMPT_PLAYBOOK.md
+START_HERE.md
+STUDENT_START_PROMPT.md
