@@ -1,0 +1,11 @@
+name,phone,email,preferred_method,help_type,availability_pattern
+Sydney Adamu,555-0142,sydney.adamu@example.com,Text,Meals,Weekdays
+Tina Marrero,555-0177,tina.marrero@example.com,Text,Groceries,Weekdays
+Neil Fak,555-0193,neil.fak@example.com,Email,Groceries,Weekdays
+Neil Fak,555-0193,neil.fak@example.com,Email,Transportation,Any time
+Carmy Berzatto,555-0108,carmy.berzatto@example.com,Text,Transportation,Any time
+Marcus Brooks,555-0165,marcus.brooks@example.com,Email,Transportation,Any time
+Richie Jerimovich,555-0121,richie.jerimovich@example.com,Text,Groceries,Weekends
+Richie Jerimovich,555-0121,richie.jerimovich@example.com,Text,Meals,Weekends
+Donna Berzatto,555-0134,donna.berzatto@example.com,Email,Pet Care,Weekends
+Jimmy Kalinowski,555-0189,jimmy.kalinowski@example.com,Email,Notify Family,Any time

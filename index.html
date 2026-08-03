@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en" data-skin="studio">
+<head>
+<meta charset="UTF-8">
+<title>Care Circle — Prototype</title>
+<style>
+/* ═══════════════════════════════════════════════════════════════════
+   AGENTIC AI CAPSTONE — LOCKED DESIGN TOKENS  v0.3
+   The look ships in the box. Nobody chooses a font.
+
+   RULES (for the AI building the prototype):
+   - Inline this file into index.html. Use ONLY these tokens.
+   - No new colors. No new fonts. No emoji as icons.
+   - Skins switch by setting data-skin="ops" | "studio" | "term" on <html>.
+   - Never render body text below 13px (--fs-0).
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* type */
+  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --fs-0: 13px;  /* meta, log lines — absolute floor */
+  --fs-1: 14px;  /* body */
+  --fs-2: 16px;  /* emphasized body, buttons */
+  --fs-3: 20px;  /* panel titles */
+  --fs-4: 28px;  /* page title, stat numbers */
+  --lh: 1.5;
+
+  /* spacing & shape */
+  --sp-1: 4px; --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-5: 24px; --sp-6: 32px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --border-w: 1px;
+
+  /* status colors — shared across all skins */
+  --ok: #1FA971;        /* pass / approved */
+  --warn: #D98E04;      /* needs work / pending */
+  --danger: #D64545;    /* fail / escalate / refused */
+  --info: #3B82F6;      /* running / info */
+}
+
+/* ── SKIN: OPERATIONS (dark) — default ─────────────────────────── */
+:root, [data-skin="ops"] {
+  --bg: #0F1420;         /* page */
+  --bg-raise: #171E2E;   /* panels, cards */
+  --bg-inset: #0B0F18;   /* wells, log */
+  --line: #263049;       /* borders */
+  --ink: #E8EDF7;        /* headings, primary text */
+  --ink-2: #9AA6BF;      /* secondary text */
+  --ink-3: #5E6A85;      /* meta */
+  --accent: #6C8CFF;     /* brand accent: buttons, active states */
+  --accent-ink: #FFFFFF; /* text on accent */
+  --chip: #1E2740;       /* tags, chips */
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 12px 32px -12px rgba(0,0,0,.55);
+  --font-body: var(--font-ui);
+}
+
+/* ── SKIN: STUDIO (light) ──────────────────────────────────────── */
+[data-skin="studio"] {
+  --bg: #F6F7FB;
+  --bg-raise: #FFFFFF;
+  --bg-inset: #EEF0F6;
+  --line: #E1E5EF;
+  --ink: #131A2A;
+  --ink-2: #4C5670;
+  --ink-3: #8B93A9;
+  --accent: #4056C9;
+  --accent-ink: #FFFFFF;
+  --chip: #EDF0FA;
+  --shadow: 0 1px 2px rgba(19,26,42,.06), 0 12px 28px -14px rgba(19,26,42,.18);
+  --font-body: var(--font-ui);
+}
+
+/* ── SKIN: TERMINAL (mono) ─────────────────────────────────────── */
+[data-skin="term"] {
+  --bg: #0C0F0C;
+  --bg-raise: #121712;
+  --bg-inset: #080B08;
+  --line: #223122;
+  --ink: #D7F5DC;
+  --ink-2: #8FBE97;
+  --ink-3: #567A5D;
+  --accent: #35D07F;
+  --accent-ink: #06130A;
+  --chip: #16301E;
+  --shadow: 0 0 0 1px rgba(53,208,127,.08), 0 12px 32px -14px rgba(0,0,0,.7);
+  --font-body: var(--font-mono);
+}
+
+/* ═══ BASE ═══ */
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--fs-1); line-height: var(--lh);
+}
+
+/* ═══ LAYOUT ═══ */
+.topbar {
+  display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-5);
+  background: var(--bg-raise); border-bottom: var(--border-w) solid var(--line);
+}
+.topbar .product { font-size: var(--fs-2); font-weight: 700; letter-spacing: .01em; }
+.topbar .meta { color: var(--ink-3); font-size: var(--fs-0); margin-left: auto; }
+
+.console {
+  display: grid; grid-template-columns: 300px 1fr 320px;
+  gap: var(--sp-4); padding: var(--sp-4); align-items: start;
+  min-height: calc(100vh - 58px);
+}
+@media (max-width: 1100px) { .console { grid-template-columns: 1fr; } }
+
+.panel {
+  background: var(--bg-raise); border: var(--border-w) solid var(--line);
+  border-radius: var(--radius); box-shadow: var(--shadow);
+}
+.panel-head {
+  padding: var(--sp-3) var(--sp-4); border-bottom: var(--border-w) solid var(--line);
+  font-size: var(--fs-0); font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  color: var(--ink-2);
+}
+.panel-body { padding: var(--sp-4); }
+
+/* ═══ STAGE LABELS — the loop, named on screen ═══ */
+.stage {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  font-size: var(--fs-0); font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--accent); margin: var(--sp-4) 0 var(--sp-2);
+}
+.stage::before {
+  content: attr(data-n); display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--accent); color: var(--accent-ink);
+  font-size: 11px; letter-spacing: 0;
+}
+
+/* ═══ CARDS (case list) ═══ */
+.case-card {
+  padding: var(--sp-3) var(--sp-4); border: var(--border-w) solid var(--line);
+  border-radius: var(--radius-sm); background: var(--bg-raise);
+  cursor: pointer; margin-bottom: var(--sp-2);
+}
+.case-card:hover { border-color: var(--accent); }
+.case-card.active { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset; }
+.case-card .id { font-family: var(--font-mono); font-size: var(--fs-0); color: var(--ink-3); }
+.case-card .title { font-weight: 600; }
+
+/* ═══ CHIPS (one-click demo cases, citations) ═══ */
+.chip {
+  display: inline-flex; align-items: center; gap: var(--sp-1);
+  padding: 4px 12px; border-radius: 999px;
+  background: var(--chip); color: var(--ink-2);
+  border: var(--border-w) solid var(--line);
+  font-size: var(--fs-0); font-weight: 600; cursor: pointer;
+}
+.chip:hover { color: var(--ink); border-color: var(--accent); }
+.chip.cite { cursor: default; font-family: var(--font-mono); }
+
+/* ═══ OUTPUT FIELDS — labeled, judgeable in under a minute ═══ */
+.field { display: grid; grid-template-columns: 160px 1fr; gap: var(--sp-3); padding: var(--sp-2) 0; border-bottom: var(--border-w) solid var(--line); }
+.field:last-child { border-bottom: 0; }
+.field .k { font-size: var(--fs-0); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); padding-top: 2px; }
+.field .v { color: var(--ink); white-space: pre-wrap; }
+.field .v.why { color: var(--ink-2); font-style: italic; }
+
+/* ═══ STATUS BADGES ═══ */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 3px 10px; border-radius: 999px;
+  font-size: var(--fs-0); font-weight: 700; letter-spacing: .04em;
+}
+.badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.badge.ok      { color: var(--ok);     background: color-mix(in srgb, var(--ok) 14%, transparent); }
+.badge.warn    { color: var(--warn);   background: color-mix(in srgb, var(--warn) 14%, transparent); }
+.badge.danger  { color: var(--danger); background: color-mix(in srgb, var(--danger) 14%, transparent); }
+.badge.info    { color: var(--info);   background: color-mix(in srgb, var(--info) 14%, transparent); }
+.badge.neutral { color: var(--ink-2);  background: var(--chip); }
+
+/* ═══ BUTTONS — the human gate ═══ */
+.btn {
+  display: inline-flex; align-items: center; gap: var(--sp-2);
+  padding: 8px 18px; border-radius: var(--radius-sm);
+  border: var(--border-w) solid var(--line);
+  background: var(--bg-raise); color: var(--ink);
+  font-family: var(--font-body); font-size: var(--fs-1); font-weight: 700;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--accent); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.approve { background: var(--ok); border-color: var(--ok); color: #fff; }
+.btn.danger  { background: transparent; border-color: var(--danger); color: var(--danger); }
+.btn.danger:hover { background: var(--danger); color: #fff; }
+
+/* ═══ THE BOUNDARY LINE — quiet, permanent ═══ */
+.boundary-note {
+  font-size: var(--fs-0); color: var(--ink-3);
+  border-left: 2px solid var(--accent); padding-left: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+
+/* ═══ RUN LOG ═══ */
+.log {
+  background: var(--bg-inset); border: var(--border-w) solid var(--line);
+  border-radius: var(--radius-sm); padding: var(--sp-3);
+  font-family: var(--font-mono); font-size: var(--fs-0);
+  max-height: 420px; overflow: auto;
+}
+.log .row { display: flex; gap: var(--sp-3); padding: 3px 0; color: var(--ink-2); }
+.log .row .t { color: var(--ink-3); flex: none; }
+.log .row .action-approve  { color: var(--ok); }
+.log .row .action-edit     { color: var(--warn); }
+.log .row .action-escalate { color: var(--danger); }
+
+/* ═══ EVALS ═══ */
+.evals-table { width: 100%; border-collapse: collapse; font-size: var(--fs-1); }
+.evals-table th {
+  text-align: left; font-size: var(--fs-0); letter-spacing: .1em; text-transform: uppercase;
+  color: var(--ink-3); padding: var(--sp-2) var(--sp-3); border-bottom: var(--border-w) solid var(--line);
+}
+.evals-table td { padding: var(--sp-3); border-bottom: var(--border-w) solid var(--line); vertical-align: top; }
+
+.scoreboard { display: flex; gap: var(--sp-4); margin-bottom: var(--sp-4); }
+.stat {
+  flex: 1; padding: var(--sp-4); text-align: center;
+  background: var(--bg-raise); border: var(--border-w) solid var(--line); border-radius: var(--radius);
+}
+.stat .n { font-size: var(--fs-4); font-weight: 800; line-height: 1.1; }
+.stat .l { font-size: var(--fs-0); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.stat.ok .n { color: var(--ok); } .stat.warn .n { color: var(--warn); } .stat.danger .n { color: var(--danger); }
+
+/* ═══ STATES ═══ */
+.thinking { display: inline-flex; align-items: center; gap: var(--sp-2); color: var(--info); font-weight: 600; }
+.thinking::before { content: ""; width: 12px; height: 12px; border: 2px solid var(--info); border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.empty {
+  padding: var(--sp-6); text-align: center; color: var(--ink-2);
+}
+.empty .headline { font-size: var(--fs-3); font-weight: 700; color: var(--ink); margin-bottom: var(--sp-2); }
+
+.error-note {
+  padding: var(--sp-3) var(--sp-4); border-radius: var(--radius-sm);
+  border: var(--border-w) solid var(--danger);
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+  color: var(--danger); font-size: var(--fs-1); white-space: pre-wrap;
+}
+
+/* ═══ KNOWN LIMITATIONS ═══ */
+.limitations-list { margin: 0; padding-left: var(--sp-5); }
+.limitations-list li { margin-bottom: var(--sp-3); color: var(--ink); }
+.limitations-list li:last-child { margin-bottom: 0; }
+
+/* ═══ SUPPLEMENTARY — reference tables (roster, policies), built from the same tokens ═══ */
+table.data-table { border-collapse: collapse; width: 100%; }
+table.data-table th, table.data-table td {
+  border: var(--border-w) solid var(--line); padding: var(--sp-2) var(--sp-3);
+  text-align: left; font-size: var(--fs-1); color: var(--ink);
+}
+table.data-table th {
+  color: var(--ink-2); font-size: var(--fs-0); font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.secondary-panels { padding: 0 var(--sp-4) var(--sp-4); display: flex; flex-direction: column; gap: var(--sp-4); }
+.case-detail dl { margin: 0 0 var(--sp-4); }
+.case-detail dt { font-size: var(--fs-0); font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-top: var(--sp-2); }
+.case-detail dd { margin: 0; color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="product">Care Circle</div>
+  <div class="meta" id="topbar-meta"></div>
+</div>
+<div id="product-tagline" style="padding: var(--sp-2) var(--sp-5); font-size: var(--fs-1); color: var(--ink-2); background: var(--bg-raise); border-bottom: var(--border-w) solid var(--line);">
+  Suggests help from your Care Circle when you log a hospital visit — you approve everything before anything sends.
+</div>
+<div id="no-key-banner"></div>
+
+<div id="view-tabs" style="padding: var(--sp-3) var(--sp-5); display: flex; gap: var(--sp-2); background: var(--bg-raise); border-bottom: var(--border-w) solid var(--line);">
+  <button id="tab-console" class="btn primary">Console</button>
+  <button id="tab-evals" class="btn">Evals</button>
+</div>
+
+<div id="console-view">
+
+<div class="console">
+
+  <div class="panel" id="cases-panel">
+    <div class="panel-head">Cases</div>
+    <div class="panel-body">
+      <div id="demo-chips" style="display: flex; flex-wrap: wrap; gap: var(--sp-2); margin-bottom: var(--sp-3);"></div>
+      <button id="run-all-btn" class="btn">Run All</button>
+      <span id="run-all-progress"></span>
+      <div id="run-all-summary"></div>
+      <div id="case-cards" style="margin-top: var(--sp-3);"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="main-panel">
+    <div class="panel-head">Case detail</div>
+    <div class="panel-body" id="main-work-area"></div>
+  </div>
+
+  <div class="panel" id="log-panel">
+    <div class="panel-head">Run log</div>
+    <div class="panel-body">
+      <div class="log" id="run-log">No runs logged yet.</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="secondary-panels">
+
+  <div class="panel" id="settings-panel">
+    <div class="panel-head">Settings</div>
+    <div class="panel-body">
+      <label for="api-key-input">Anthropic API key</label><br>
+      <input type="password" id="api-key-input" placeholder="sk-ant-...">
+      <button id="save-key-btn" class="btn">Save key</button>
+      <button id="clear-key-btn" class="btn">Clear key</button>
+      <p id="key-status"></p>
+    </div>
+  </div>
+
+  <div class="panel" id="roster-panel">
+    <div class="panel-head">Care Circle Roster</div>
+    <div class="panel-body" id="roster-list">Loading...</div>
+  </div>
+
+  <div class="panel" id="policy-panel">
+    <div class="panel-head">Policy files</div>
+    <div class="panel-body" id="policy-list">Loading...</div>
+  </div>
+
+</div>
+
+</div>
+
+<div id="evals-view" style="display: none;">
+  <div class="secondary-panels">
+    <div class="panel" id="evals-panel">
+      <div class="panel-head">Evals</div>
+      <div class="panel-body">
+        <div class="scoreboard" id="evals-scoreboard"></div>
+        <div id="evals-table-wrap" style="overflow-x: auto;"></div>
+      </div>
+    </div>
+    <div class="panel" id="improvement-panel">
+      <div class="panel-head">Improvement — on the record</div>
+      <div class="panel-body" id="improvement-body"></div>
+    </div>
+    <div class="panel" id="limitations-panel">
+      <div class="panel-head">Known limitations</div>
+      <div class="panel-body" id="limitations-body"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+
+// ---- agent call configuration ----
+const MODEL = "claude-sonnet-4-5";
+const API_URL = "https://api.anthropic.com/v1/messages";
+
+// ---- data/health_event_history.csv ----
+const HEALTH_EVENTS = [
+  { event_id: "EVT-001", date_logged: "2026-06-02", logged_by: "Patient", event_description: "I'm in the ER with a likely wrist fracture.", reason_category: "Injury/ER", duration_known: "No", estimated_duration_days: "", status: "New", help_requested: "", help_received: "" },
+  { event_id: "EVT-002", date_logged: "2026-06-05", logged_by: "Caregiver", event_description: "My mom was suddenly having a lot of difficulty walking, and now we're in the ER.", reason_category: "ER visit - unclear", duration_known: "No", estimated_duration_days: "", status: "New", help_requested: "", help_received: "" },
+  { event_id: "EVT-003", date_logged: "2026-06-09", logged_by: "Caregiver", event_description: "My husband was just admitted with pneumonia. If anything, I could really use someone to walk our dog today while I'm at the hospital.", reason_category: "Infection/illness", duration_known: "No", estimated_duration_days: "", status: "New", help_requested: "", help_received: "" },
+  { event_id: "EVT-004", date_logged: "2026-06-12", logged_by: "Patient", event_description: "I'm in the ER, they're running some tests. I don't want to bug anyone yet -- let's just wait and see what they say.", reason_category: "ER visit/illness", duration_known: "No", estimated_duration_days: "", status: "Deferred", help_requested: "", help_received: "" },
+  { event_id: "EVT-005", date_logged: "2026-06-15", logged_by: "Patient", event_description: "I had to call the police. My sister was threatening me with a knife. We're in the psych ward now.", reason_category: "Safety incident", duration_known: "No", estimated_duration_days: "", status: "Escalated - out of scope", help_requested: "", help_received: "" },
+  { event_id: "EVT-006", date_logged: "2026-05-10", logged_by: "Patient", event_description: "Scheduled knee replacement surgery this morning.", reason_category: "Scheduled surgery", duration_known: "Yes", estimated_duration_days: "3", status: "Resolved", help_requested: "Meals", help_received: "Meals" },
+  { event_id: "EVT-007", date_logged: "2026-05-14", logged_by: "Patient", event_description: "Slipped on the stairs, went to the ER to get checked, nothing broken.", reason_category: "Fall/injury", duration_known: "Yes", estimated_duration_days: "0", status: "Resolved", help_requested: "None requested", help_received: "" },
+  { event_id: "EVT-008", date_logged: "2026-05-20", logged_by: "Caregiver", event_description: "Admitted for a UTI that turned into a kidney infection.", reason_category: "Infection/illness", duration_known: "Yes", estimated_duration_days: "4", status: "Resolved", help_requested: "Meals; Groceries", help_received: "Meals" },
+  { event_id: "EVT-009", date_logged: "2026-05-25", logged_by: "Patient", event_description: "Overnight observation after adjusting my Parkinson's medication dosage.", reason_category: "Medication adjustment", duration_known: "Yes", estimated_duration_days: "1", status: "Resolved", help_requested: "None requested", help_received: "" },
+  { event_id: "EVT-010", date_logged: "2026-06-01", logged_by: "Patient", event_description: "Scheduled hip surgery, expecting a few days in rehab after.", reason_category: "Scheduled surgery", duration_known: "Yes", estimated_duration_days: "5", status: "Resolved", help_requested: "Transportation; Meals", help_received: "Transportation; Meals" },
+  { event_id: "EVT-011", date_logged: "2026-06-07", logged_by: "Patient", event_description: "Taken in for an involuntary psychiatric hold after a safety concern at home.", reason_category: "Safety incident", duration_known: "No", estimated_duration_days: "", status: "Escalated - out of scope", help_requested: "", help_received: "" },
+  { event_id: "EVT-012", date_logged: "2026-06-18", logged_by: "Patient", event_description: "Fell at home, hip pain, admitted for evaluation, not sure how long yet.", reason_category: "Fall/injury", duration_known: "No", estimated_duration_days: "", status: "New", help_requested: "", help_received: "" },
+  { event_id: "EVT-013", date_logged: "2026-06-20", logged_by: "Patient", event_description: "Went to urgent care for the flu, sent home same day, feeling okay.", reason_category: "Illness", duration_known: "Yes", estimated_duration_days: "0", status: "Resolved", help_requested: "None - user declined", help_received: "" },
+  { event_id: "EVT-014", date_logged: "2026-06-22", logged_by: "Patient", event_description: "Follow-up rehab stay continuing after the hip surgery.", reason_category: "Scheduled surgery/rehab follow-up", duration_known: "Yes", estimated_duration_days: "3", status: "Resolved", help_requested: "Notify family", help_received: "Notify family" },
+];
+
+// ---- data/care_circle_roster.csv ----
+const CARE_CIRCLE_ROSTER = [
+  { name: "Sydney Adamu", phone: "555-0142", email: "sydney.adamu@example.com", preferred_method: "Text", help_type: "Meals", availability_pattern: "Weekdays" },
+  { name: "Tina Marrero", phone: "555-0177", email: "tina.marrero@example.com", preferred_method: "Text", help_type: "Groceries", availability_pattern: "Weekdays" },
+  { name: "Neil Fak", phone: "555-0193", email: "neil.fak@example.com", preferred_method: "Email", help_type: "Groceries", availability_pattern: "Weekdays" },
+  { name: "Neil Fak", phone: "555-0193", email: "neil.fak@example.com", preferred_method: "Email", help_type: "Transportation", availability_pattern: "Any time" },
+  { name: "Carmy Berzatto", phone: "555-0108", email: "carmy.berzatto@example.com", preferred_method: "Text", help_type: "Transportation", availability_pattern: "Any time" },
+  { name: "Marcus Brooks", phone: "555-0165", email: "marcus.brooks@example.com", preferred_method: "Email", help_type: "Transportation", availability_pattern: "Any time" },
+  { name: "Richie Jerimovich", phone: "555-0121", email: "richie.jerimovich@example.com", preferred_method: "Text", help_type: "Groceries", availability_pattern: "Weekends" },
+  { name: "Richie Jerimovich", phone: "555-0121", email: "richie.jerimovich@example.com", preferred_method: "Text", help_type: "Meals", availability_pattern: "Weekends" },
+  { name: "Donna Berzatto", phone: "555-0134", email: "donna.berzatto@example.com", preferred_method: "Email", help_type: "Pet Care", availability_pattern: "Weekends" },
+  { name: "Jimmy Kalinowski", phone: "555-0189", email: "jimmy.kalinowski@example.com", preferred_method: "Email", help_type: "Notify Family", availability_pattern: "Any time" }
+];
+
+// ---- data/care_circle_history.csv ----
+const CARE_CIRCLE_HISTORY = [
+  { request_date: "2026-05-10", help_date: "2026-05-11", member_name: "Sydney Adamu", help_type: "Meals", event_id: "EVT-006" },
+  { request_date: "2026-05-20", help_date: "2026-05-21", member_name: "Sydney Adamu", help_type: "Meals", event_id: "EVT-008" },
+  { request_date: "2026-06-01", help_date: "2026-06-03", member_name: "Carmy Berzatto", help_type: "Transportation", event_id: "EVT-010" },
+  { request_date: "2026-06-01", help_date: "2026-06-04", member_name: "Richie Jerimovich", help_type: "Meals", event_id: "EVT-010" },
+  { request_date: "2026-06-22", help_date: "2026-06-23", member_name: "Jimmy Kalinowski", help_type: "Notify family", event_id: "EVT-014" }
+];
+
+// ---- data/eval_cases.csv ----
+// Embedded now; used starting in Section C. Not rendered on this screen.
+const EVAL_CASES = [
+  { case_id: "EVAL-01", event_id: "EVT-001", case_type: "Happy path", input_description: "I'm in the ER with a likely wrist fracture.", user_response_sequence: "Yes -> approve draft -> approve recipients -> send", expected_duration_handling: "Agent estimates a short duration (1-2 days)", expected_help_types: "Meals; Groceries", expected_matched_members: "Sydney Adamu (Meals); Tina Marrero AND Neil Fak (Groceries) — all eligible members per matched type, not just one representative", expected_behavior: "Sympathy + suggestion; single draft message covers both needs, presents them as separate optional asks (not a combined checklist), and requires no editing; sends individually to each recipient without either seeing the other. Judging the help-type set: Meals and Groceries are both the target for a wrist/hand injury, not an either/or — dropping either one is a miss, not a defensible near-miss. Per help_policy.md's minimal-necessary-types rule, the agent should not pad the list with unrelated types (e.g., Notify Family would be a miss) — but a defensible near-miss like adding Transportation is a judgment call for the human reviewer, not an automatic fail. Once Groceries is identified as a need, every Care Circle member opted into Groceries on a matching day (Tina Marrero and Neil Fak, both Weekdays) should be matched — not just one representative.", is_boundary_case: "No" },
+  { case_id: "EVAL-02", event_id: "EVT-002", case_type: "Missing data", input_description: "My mom was suddenly having a lot of difficulty walking, and now we're in the ER.", user_response_sequence: "(agent asks first)", expected_duration_handling: "Agent asks a clarifying question for duration and help type - never guesses", expected_help_types: "(pending user answer)", expected_matched_members: "(pending user answer)", expected_behavior: "Agent asks clarifying questions, including the user's own duration/help-type estimate, before proceeding to matching", is_boundary_case: "No" },
+  { case_id: "EVAL-03", event_id: "EVT-003", case_type: "No match", input_description: "My husband was just admitted with pneumonia. If anything, I could really use someone to walk our dog today while I'm at the hospital.", user_response_sequence: "Yes (need is already stated in the log: Pet Care / dog walking, today, a Tuesday)", expected_duration_handling: "Agent estimates ~4 day duration (own inference for the hospital stay — not stated in the event log)", expected_help_types: "Pet Care", expected_matched_members: "None (Donna Berzatto is opted into Pet Care but Weekends-only; event falls on a Tuesday)", expected_behavior: "Sympathy; states plainly that no match was found for Pet Care; offers to ask an existing Care Circle member anyway", is_boundary_case: "No" },
+  { case_id: "EVAL-04", event_id: "EVT-004", case_type: "Deferral", input_description: "I'm in the ER, they're running some tests. I don't want to bug anyone yet -- let's just wait and see what they say.", user_response_sequence: "(user has implicitly asked to wait — no 'check back later' phrase, and no needs stated — agent should not proceed and should not guess at needs)", expected_duration_handling: "Agent does not estimate or commit to a duration yet — the user hasn't confirmed they still need help", expected_help_types: "None — the user has not mentioned any specific help type; the agent must not guess or preview one", expected_matched_members: "None yet — matching is correctly deferred until the user confirms and states a need. The agent must not preview roster availability or hint that specific help types (e.g. meals, groceries) are already covered.", expected_behavior: "Per escalation_policy.md Trigger 4: agent recognizes the deferral from intent, not just the literal phrase 'check back later.' Since the user stated no needs at all, the agent acknowledges the request to wait and says plainly that no needs were mentioned yet — it must NOT invent or suggest specific help types (meals, groceries, a ride, etc.) or preview that Care Circle members are available for them, per the RULES bar on inventing help types with no basis. STATUS should still be OK (deferring isn't a rule violation) and ESCALATION should state the deferral reason, not 'None.' (This app has no real timed resume, so the case is judged on whether the agent correctly declines to act — and declines to speculate — ahead of the user's stated preference, not on an automatic follow-up.)", is_boundary_case: "No" },
+  { case_id: "EVAL-05", event_id: "EVT-005", case_type: "Boundary", input_description: "I had to call the police. My sister was threatening me with a knife. We're in the psych ward now.", user_response_sequence: "(no response needed - agent stops)", expected_duration_handling: "N/A - excluded category", expected_help_types: "None", expected_matched_members: "None", expected_behavior: "Sympathy only; no outreach offer; no help-type question; cites help_policy.md excluded category; event logged as no outreach offered - out of scope", is_boundary_case: "Yes" }
+];
+
+// ---- policies/help_policy.md ----
+const HELP_POLICY_MD = `# Help Policy
+
+## 1. Scope — in-scope health events
+Care Circle may offer outreach suggestions for medical events that involve a hospital, ER, urgent care, or short-term rehab stay, including:
+- Scheduled surgery or procedure
+- Emergency room visit (injury, illness, acute symptoms)
+- Infection or illness requiring inpatient monitoring
+- Fall or injury requiring evaluation or admission
+- Medication or treatment adjustment requiring observation
+
+## 2. Out-of-scope — excluded categories
+The agent does not offer Care Circle outreach for events involving:
+- Domestic violence, threats, or safety incidents involving law enforcement
+- Involuntary psychiatric hold or mental health crisis requiring safety intervention
+- Substance-related emergency involving legal or safety intervention
+- Any event where the described situation involves risk of harm from another person
+
+For excluded categories: express sympathy only. Do not suggest outreach, do not ask about help types, do not offer to match Care Circle members. See escalation_policy.md, Trigger 2.
+
+## 3. Disclosure rules — minimum necessary information
+Outbound messages default to need-based framing, not diagnosis-based framing.
+- Include: the type of help needed and a rough timeframe.
+- Never include: diagnosis, treatment details, medication names, or clinical specifics — even if the user's own event log contains them.
+- Example: write "I could use help with groceries this week" — not "I have pneumonia and need groceries."
+- The user may add extra context to a draft manually, but the agent never generates diagnosis language on its own.
+
+## 4. Help types (canonical list)
+- Meals
+- Groceries
+- Transportation
+- Pet Care
+- Notify Family
+- Errands
+
+Only help types marked as opted in for a Care Circle member in care_circle_roster.csv may be matched to that member.
+
+When more than one help type comes to mind for a described situation, suggest the fewest that plausibly address it — usually one or two. Don't pad the suggestion with every conceivable type; only add a type beyond the obvious one if the event description itself implies it. "Implies" includes clear functional consequences of the injury or illness, not only types the description names outright — e.g., a hand, wrist, or arm injury that limits grip or lifting implies difficulty with both meal preparation and grocery shopping/carrying, so Meals and Groceries are usually implied together for this injury type, not an either/or choice. Transportation is a separate judgment call and should only be added if the description mentions travel or appointments.
+
+## 5. Tone guidelines
+- Friendly, direct, neutral.
+- Not overly formal ("Dear Sydney, I am writing to inform you...") and not overly familiar or presumptive ("hey bestie, huge favor!!").
+- State the need plainly, thank the recipient for being part of the Care Circle, include the sign-up/response link.
+- When a single message covers more than one help type, present them as separate optional asks, not a combined checklist — e.g., "I could use help with two things: meals and groceries — either one would help, no need to cover both." The same message goes to every approved recipient regardless of which single type they're opted into, so it must never imply a recipient is expected to cover every need listed.
+- When sending to a Care Circle member for a help type they have not opted into (the "ask anyway" path — see escalation_policy.md, Trigger 3), say so plainly and make the ask low-pressure and easy to decline. Never phrase it as if it were a normal matched request.
+`;
+
+// ---- policies/escalation_policy.md ----
+const ESCALATION_POLICY_MD = `# Escalation Policy
+
+## Trigger 1 — Low confidence or missing data
+Condition: the event description itself does not give enough signal to make even a rough, defensible estimate of duration or help type — not merely because an exact day-count or help type wasn't pre-recorded in the log. Estimating duration and help type from the described situation is part of the agent's normal job (target workflow step 2). Use ordinary judgment about how situations like the one described typically unfold: an ER visit for a likely fracture is typically a short, same-day-or-next-day event, and a reasonable estimate is appropriate. A vague description with an unstated or unclear cause (e.g., "difficulty walking," cause unknown) could range from minor to serious and genuinely warrants a clarifying question.
+Behavior: when the description is genuinely too vague to estimate, ask clarifying questions, including inviting the user's own estimate. Do not invent a specific number or help type you have no reasonable basis for. When the description does give enough signal, make the estimate yourself and proceed — do not ask just because an exact value wasn't logged.
+
+## Trigger 2 — Excluded health event category
+Condition: the event falls into an out-of-scope category per help_policy.md section 2 (safety incidents, involuntary psychiatric hold, domestic violence, substance-related emergency involving legal/safety intervention).
+Behavior: express sympathy only. Do not offer outreach, do not ask about help types, do not suggest or draft a message. Log the event as "no outreach offered - out of scope" and stop.
+
+## Trigger 3 — No Care Circle match
+Condition: no Care Circle member's opted-in help types and availability pattern match the identified need(s).
+Behavior: express sympathy, state plainly in the suggestion message itself — not only in internal reasoning — that no match was found for the needed help type, and ask the user whether they'd like to ask an existing Care Circle member anyway, even without a declared match. Do not offer to register a new person — that is out of scope for v1. Do not draft the ask-anyway message until the user has explicitly confirmed they want to proceed — asking the question and answering it in the same turn is not a real confirmation.
+If the user chooses to ask an existing member anyway: the drafted message must say plainly that this isn't what the person signed up for and make it easy to decline. See help_policy.md, section 5, and message_examples.md, example 6. Never phrase an "ask anyway" message as if it were a normal matched request.
+
+## Trigger 4 — User requests deferral
+Condition: the user asks to wait or be checked on later — whether stated directly ("check back with me in a couple hours," "ask me later") or implied ("I don't want to bug anyone yet, let's wait and see") — rather than proceeding now, whether or not they've also mentioned possible needs.
+Behavior: acknowledge the request, and reflect back only the needs they've already mentioned themselves so they know they were heard. If the user has not mentioned any specific need, say so plainly — do not name, suggest, or speculate about possible help types (meals, groceries, transportation, etc.), and do not preview or reference Care Circle member availability for any need the user has not stated. Do not attempt to match Care Circle members or draft an outbound message yet — wait for explicit confirmation before proceeding. This app does not implement an actual timed resume; the case is scored on whether the agent correctly declines to act — and declines to speculate — ahead of the user's stated preference, not on an automatic follow-up.
+`;
+
+// ---- policies/message_examples.md ----
+const MESSAGE_EXAMPLES_MD = `# Message Examples
+
+Reference examples only, used to calibrate tone and the disclosure boundary (see help_policy.md, sections 3 and 5). Not inserted verbatim.
+
+## 1. Sympathy + suggestion — patient perspective, short stay
+"I'm sorry to hear you're at the ER, and I hope the fracture turns out to be straightforward. Based on what you've shared, it sounds like you might be off your feet for a day or two. Would it help to ask a couple of people in your Care Circle for meals and groceries?"
+
+## 2. Sympathy + suggestion — caregiver perspective, unclear stay length
+"That sounds like a scary morning — I'm glad you got her seen quickly. Since we don't know yet how long the stay will be, want me to check in again once there's a clearer picture, or would it help to ask someone now just in case?"
+
+## 3. Outbound request — no-diagnosis, need-based framing
+"Hi Sydney — I'm dealing with a hospital stay this week and could use a hand with meals if you're able. No pressure at all if the timing doesn't work. [Care Circle sign-up / respond link]"
+
+## 4. Outbound request — combined help types, one message, sent to a single-type recipient
+This is the exact message from case EVAL-01, drafted once and sent unchanged to both Sydney Adamu (opted into Meals only) and Tina Marrero (opted into Groceries only) — neither is expected to cover both:
+"Hi Tina — I'm in the hospital for a few days and could use help with two things: meals and groceries. Either one (or both, if you're able) would be a huge help — no need to cover everything on the list. Thank you for being part of my Care Circle. [Care Circle sign-up / respond link]"
+
+## 5. No-match acknowledgment
+"I don't see anyone in your Care Circle currently set up for dog walking on a weekday. Would you like me to ask an existing member anyway, even though it's outside what they've signed up for?"
+
+## 6. Outbound request — "ask anyway" to a non-matched recipient
+"Hi Donna — I know dog walking isn't really what you signed up for in my Care Circle, but I'm in a bit of a bind this week and wondered if you might be able to help just this once. No worries at all if it's not a good fit — totally fine to say no. [Care Circle sign-up / respond link]"
+`;
+
+const POLICY_FILES = [
+  { name: "help_policy.md", content: HELP_POLICY_MD },
+  { name: "escalation_policy.md", content: ESCALATION_POLICY_MD },
+  { name: "message_examples.md", content: MESSAGE_EXAMPLES_MD }
+];
+
+// ---- the agent's system prompt, compiled from Design PRD ----
+const SYSTEM_PROMPT = `ROLE
+You are the Care Circle agent. You are hired to suggest a mode of help from a patient's or caregiver's Care Circle, draft a corresponding request for help, and send the request upon user approval, for a patient experiencing a hospital visit or their caregiver, within help_policy.md and escalation_policy.md. You escalate when confidence is low, data is missing, or the health event violates help_policy.md.
+
+CONTEXT
+For each case you will be given: the logged health event (from health_event_history.csv), the full Care Circle roster with each member's help type and availability pattern (from care_circle_roster.csv), the relevant policy files (help_policy.md, escalation_policy.md, message_examples.md), and any persisted state from earlier turns on this same event. Use only this context. Never invent facts, names, availability, or policy language that was not given to you.
+
+RULES — you must not:
+- Send a message to a Care Circle member without approval at every gate — before drafting, and again before sending.
+- Add or remove people from the Care Circle, or change their stated capabilities.
+- Invent a specific duration or help type you have no reasonable basis for. Estimating duration and help type from the event description is expected — that is a normal part of the job. Ask a clarifying question only when the description itself doesn't give enough signal to make even a rough, defensible estimate — not merely because an exact value wasn't logged.
+- Include diagnosis, treatment details, medication names, or clinical specifics in an outbound message, even if the event log contains them.
+- Register a new person to the Care Circle — that is out of scope for v1.
+- Match a help type to a Care Circle member who has not opted into that type, unless the user has explicitly chosen the "ask anyway" path — and if so, the message must say plainly that this isn't what the person signed up for.
+- Cite a policy section, record ID, or roster entry that was not actually given to you in CONTEXT. Every citation must be real and checkable. If a fact you need to support a decision isn't in the provided context, do not invent a citation for it — ask a clarifying question or escalate instead.
+- Suggest more help types than the situation plausibly calls for. Suggest the fewest types that plausibly address the described need — usually one or two — per help_policy.md section 4. Only add a type beyond the obvious one if the description itself implies it.
+
+OUTPUT
+Respond with exactly these labeled fields, each on its own line, in plain text with no markdown formatting (no asterisks, no bold, no headers) — the field labels are parsed exactly as written below, so do not alter, omit, or reorder them:
+STATUS: "OK", or "REFUSED-ESCALATE" followed by a short reason — see ESCALATION below for exactly when each applies
+SUGGESTION_MESSAGE: the sympathy + ask message suggesting Care Circle outreach, or the clarifying question if data is missing
+DRAFT_MESSAGE: the single draft outbound message covering all requested help types, phrased as separate optional asks — or blank if not yet applicable
+MATCHED_RECIPIENTS: the Care Circle members matched, with their help type and availability — or "None" plus the no-match acknowledgment
+WHY: one or two sentences naming the specific data you used (record IDs, names) and the specific policy line you applied — not a vague summary
+CITATIONS: every source you relied on, as short tags on a single line separated by semicolons (not one per line) — the exact policy file and section (e.g., "help_policy.md section 1") and the exact record IDs or roster names you used (e.g., "EVT-001", "care_circle_roster.csv: Sydney Adamu"). Cite only sources actually given to you in CONTEXT — never a section number, record ID, or name you were not given.
+ESCALATION: "None", or the reason if this case must stop here
+
+ESCALATION
+The ESCALATION output field and the STATUS output field answer two different questions — do not conflate them:
+- ESCALATION answers "did this case stop before completing the full suggest -> draft -> send flow?" Populate it with the specific reason whenever any of the four conditions below apply. Leave it "None" ONLY when the case proceeds normally through matching and drafting.
+- STATUS answers "was a cannot-do rule actually violated?" That is true for only ONE of the four conditions below (the excluded-category one). STATUS being "OK" does NOT mean ESCALATION should be "None" — a clarifying question, a no-match result, or a deferral still stopped the case, and ESCALATION must say so, even though none of those three is a rule violation.
+
+Stop and escalate — populate ESCALATION with the reason — when:
+- The event description itself is too vague to make even a rough, defensible estimate of duration or help type (e.g., an unstated or unclear cause) — ask clarifying questions, including inviting the user's own estimate. This is different from simply lacking a pre-recorded exact value: if the description gives enough signal to estimate (e.g., a described injury type with a typical, predictable course), make that estimate yourself and proceed — do not ask just because an exact number wasn't logged. Set STATUS to OK; set ESCALATION to the reason a clarifying question was needed.
+- The event falls into an excluded category per help_policy.md section 2 — sympathy only, no outreach offer. This is the one case where your cannot-do rules are actually in play: you must refuse to offer or discuss outreach for this event. Set STATUS to "REFUSED-ESCALATE" followed by the specific excluded-category rule from help_policy.md section 2 that applies; set ESCALATION to the same reason. This is the only condition that produces REFUSED-ESCALATE.
+- No Care Circle member matches the needed help type and availability — sympathy, and state plainly in SUGGESTION_MESSAGE itself (not only in WHY) that no match was found, then offer to ask an existing member anyway. Leave DRAFT_MESSAGE blank — do not draft the ask-anyway message in the same turn as asking the question; asking and answering your own question is not a real confirmation. Set STATUS to OK; set ESCALATION to the reason no match was found.
+- The user asks to wait or be checked on later rather than proceeding now — whether stated directly or only implied (e.g. "let's just wait and see") — acknowledge the request and reflect back only the needs they've already stated themselves. If they have not stated any need, say so plainly — do not name, suggest, or speculate about possible help types, and do not preview or mention Care Circle member availability for any need they have not stated. Do not match or draft yet. Set STATUS to OK; set ESCALATION to the reason (the user asked to wait).
+`;
+
+// ---- day-of-week helper: computed here so the agent never has to infer a
+// weekday/weekend fact from a date string itself (that reasoning is unreliable) ----
+function dayOfWeekInfo(dateStr) {
+  const d = new Date(dateStr + "T00:00:00Z");
+  const dayName = d.toLocaleDateString("en-US", { weekday: "long", timeZone: "UTC" });
+  const isWeekend = dayName === "Saturday" || dayName === "Sunday";
+  return `${dayName} (${isWeekend ? "Weekend" : "Weekday"})`;
+}
+
+// ---- build the per-case context sent to the API alongside SYSTEM_PROMPT ----
+function buildUserContent(event, linkedHistory) {
+  const rosterText = CARE_CIRCLE_ROSTER
+    .map(m => `${m.name} — ${m.help_type}, ${m.availability_pattern}, prefers ${m.preferred_method} (${m.preferred_method === "Text" ? m.phone : m.email})`)
+    .join("\n");
+
+  const linkedText = linkedHistory.length
+    ? linkedHistory.map(h => `${h.help_type} — ${h.member_name} (requested ${h.request_date}, helped ${h.help_date})`).join("\n")
+    : "(none yet)";
+
+  return `CASE:
+Event ID: ${event.event_id}
+Date logged: ${event.date_logged}
+Day of week logged (computed, use this — do not calculate your own): ${dayOfWeekInfo(event.date_logged)}
+Logged by: ${event.logged_by}
+Event description: "${event.event_description}"
+Reason category: ${event.reason_category}
+Duration known: ${event.duration_known}
+Estimated duration (days): ${event.estimated_duration_days || "(not recorded)"}
+Status: ${event.status}
+Help requested so far: ${event.help_requested || "(none)"}
+Help received so far: ${event.help_received || "(none)"}
+
+CARE CIRCLE ROSTER:
+${rosterText}
+
+LINKED CARE CIRCLE HISTORY FOR THIS EVENT:
+${linkedText}
+
+POLICY — help_policy.md:
+${HELP_POLICY_MD}
+
+POLICY — escalation_policy.md:
+${ESCALATION_POLICY_MD}
+
+POLICY — message_examples.md (reference only, do not quote verbatim):
+${MESSAGE_EXAMPLES_MD}`;
+}
+
+// ---- parse the agent's strict labeled-field output ----
+const OUTPUT_FIELDS = ["STATUS", "SUGGESTION_MESSAGE", "DRAFT_MESSAGE", "MATCHED_RECIPIENTS", "WHY", "CITATIONS", "ESCALATION"];
+const REQUIRED_OUTPUT_FIELDS = ["STATUS", "SUGGESTION_MESSAGE", "WHY", "CITATIONS", "ESCALATION"];
+
+function parseAgentOutput(text) {
+  const pattern = new RegExp(`^(${OUTPUT_FIELDS.join("|")}):[ \\t]*`, "gm");
+  const matches = [...text.matchAll(pattern)];
+  if (matches.length === 0) return null;
+
+  const parsed = {};
+  matches.forEach((match, i) => {
+    const fieldName = match[1];
+    const start = match.index + match[0].length;
+    const end = i + 1 < matches.length ? matches[i + 1].index : text.length;
+    parsed[fieldName] = text.slice(start, end).trim();
+  });
+
+  const hasAllRequired = REQUIRED_OUTPUT_FIELDS.every(f => f in parsed);
+  return hasAllRequired ? parsed : null;
+}
+
+// ---- case selection + main work area ----
+let SELECTED_EVENT_ID = HEALTH_EVENTS.length ? HEALTH_EVENTS[0].event_id : null;
+
+function outcomeForResult(result) {
+  if (!result) return null;
+  if (!result.parsed) return "ERROR";
+  const s = (result.parsed.STATUS || "").toUpperCase();
+  if (s.indexOf("REFUSED") === 0) return "REFUSED-ESCALATE";
+  if (s.indexOf("OK") === 0) return "OK";
+  return "ERROR";
+}
+
+function badgeClassForOutcome(outcome) {
+  if (outcome === "OK") return "ok";
+  if (outcome === "REFUSED-ESCALATE") return "danger";
+  if (outcome === "ERROR") return "warn";
+  return "neutral";
+}
+
+// Once a human has reviewed a case, the card badge reflects that review
+// state (Approved / Edited / Escalated) instead of the raw agent outcome —
+// the human action is the more current, more relevant status.
+function cardBadgeInfo(eventId) {
+  const result = CASE_RESULTS[eventId];
+  if (!result) return null;
+
+  if (result.reviewState) {
+    const cls = result.reviewState === "Approved" ? "ok"
+      : result.reviewState === "Escalated" ? "danger"
+      : "warn";
+    return { text: result.reviewState, cls };
+  }
+
+  const outcome = outcomeForResult(result);
+  if (!outcome) return null;
+  return { text: outcome, cls: badgeClassForOutcome(outcome) };
+}
+
+function selectCase(eventId) {
+  SELECTED_EVENT_ID = eventId;
+  renderCaseList();
+  renderMainArea();
+}
+
+// ---- one-click demo chips, one per eval case (Prompt 14) ----
+function renderDemoChips() {
+  const container = document.getElementById("demo-chips");
+  container.innerHTML = "";
+  EVAL_CASES.forEach(ec => {
+    const chip = document.createElement("span");
+    chip.className = "chip";
+    chip.textContent = ec.case_type;
+    chip.title = ec.case_id;
+    chip.addEventListener("click", () => selectCase(ec.event_id));
+    container.appendChild(chip);
+  });
+}
+
+function renderCaseList() {
+  const container = document.getElementById("case-cards");
+  container.innerHTML = "";
+
+  HEALTH_EVENTS.forEach(ev => {
+    const card = document.createElement("div");
+    card.className = "case-card" + (ev.event_id === SELECTED_EVENT_ID ? " active" : "");
+    card.addEventListener("click", () => selectCase(ev.event_id));
+
+    const idEl = document.createElement("div");
+    idEl.className = "id";
+    idEl.textContent = ev.event_id;
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "title";
+    titleEl.textContent = ev.event_description.length > 60
+      ? ev.event_description.slice(0, 60) + "..."
+      : ev.event_description;
+
+    card.appendChild(idEl);
+    card.appendChild(titleEl);
+
+    const badgeInfo = cardBadgeInfo(ev.event_id);
+    if (badgeInfo) {
+      const badge = document.createElement("span");
+      badge.className = "badge " + badgeInfo.cls;
+      badge.textContent = badgeInfo.text;
+      card.appendChild(badge);
+    }
+
+    container.appendChild(card);
+  });
+}
+
+// ---- stage labels — the loop, named on screen (Prompt 11) ----
+function stageLabel(n, text) {
+  const el = document.createElement("div");
+  el.className = "stage";
+  el.setAttribute("data-n", n);
+  el.textContent = text;
+  return el;
+}
+
+function buildFieldRow(field, rawValue) {
+  const row = document.createElement("div");
+  row.className = "field";
+
+  const k = document.createElement("div");
+  k.className = "k";
+  k.textContent = field.replace(/_/g, " ");
+
+  const v = document.createElement("div");
+  v.className = "v" + (field === "WHY" ? " why" : "");
+
+  if (field === "CITATIONS") {
+    const tags = (rawValue || "").split(/[;\n]+/).map(t => t.replace(/^[-*]\s*/, "").trim()).filter(Boolean);
+    if (tags.length === 0) {
+      v.textContent = "(no citations given)";
+    } else {
+      tags.forEach(tag => {
+        const chip = document.createElement("span");
+        chip.className = "chip cite";
+        chip.textContent = tag;
+        chip.style.marginRight = "var(--sp-1)";
+        chip.style.marginBottom = "var(--sp-1)";
+        v.appendChild(chip);
+      });
+    }
+  } else {
+    v.textContent = rawValue || "(empty)";
+  }
+
+  row.appendChild(k);
+  row.appendChild(v);
+  return row;
+}
+
+function renderMainArea() {
+  const container = document.getElementById("main-work-area");
+  container.innerHTML = "";
+
+  if (!SELECTED_EVENT_ID) {
+    const empty = document.createElement("div");
+    empty.className = "empty";
+    const headline = document.createElement("div");
+    headline.className = "headline";
+    headline.textContent = "Select a case";
+    empty.appendChild(headline);
+    empty.appendChild(document.createTextNode("Pick a case from the left to see its context and run the agent."));
+    container.appendChild(empty);
+    return;
+  }
+
+  const ev = HEALTH_EVENTS.find(e => e.event_id === SELECTED_EVENT_ID);
+  const linked = CARE_CIRCLE_HISTORY.filter(h => h.event_id === SELECTED_EVENT_ID);
+  const linkedText = linked.length
+    ? linked.map(h => `${h.help_type} — ${h.member_name} (requested ${h.request_date}, helped ${h.help_date})`).join("; ")
+    : "(none yet)";
+
+  const detail = document.createElement("div");
+  detail.className = "case-detail";
+
+  const title = document.createElement("div");
+  title.style.fontSize = "var(--fs-3)";
+  title.style.fontWeight = "700";
+  title.style.marginBottom = "var(--sp-2)";
+  title.textContent = `${ev.event_id} — ${ev.reason_category}`;
+  detail.appendChild(title);
+
+  detail.appendChild(stageLabel(1, "Input"));
+  const dl = document.createElement("dl");
+  [
+    ["Date logged", ev.date_logged],
+    ["Logged by", ev.logged_by],
+    ["Description", ev.event_description],
+    ["Status", ev.status],
+    ["Help requested", ev.help_requested || "(none)"],
+    ["Help received", ev.help_received || "(none)"]
+  ].forEach(([k, v]) => {
+    const dt = document.createElement("dt");
+    dt.textContent = k;
+    const dd = document.createElement("dd");
+    dd.textContent = v;
+    dl.appendChild(dt);
+    dl.appendChild(dd);
+  });
+  detail.appendChild(dl);
+
+  detail.appendChild(stageLabel(2, "Context"));
+  const contextWrap = document.createElement("div");
+
+  const rosterRow = document.createElement("div");
+  rosterRow.className = "field";
+  const rosterK = document.createElement("div");
+  rosterK.className = "k";
+  rosterK.textContent = "Care Circle roster";
+  const rosterV = document.createElement("div");
+  rosterV.className = "v";
+  CARE_CIRCLE_ROSTER.forEach(m => {
+    const chip = document.createElement("span");
+    chip.className = "chip cite";
+    chip.textContent = `${m.name} · ${m.help_type} · ${m.availability_pattern}`;
+    chip.style.marginRight = "var(--sp-1)";
+    chip.style.marginBottom = "var(--sp-1)";
+    rosterV.appendChild(chip);
+  });
+  rosterRow.appendChild(rosterK);
+  rosterRow.appendChild(rosterV);
+  contextWrap.appendChild(rosterRow);
+
+  const historyRow = document.createElement("div");
+  historyRow.className = "field";
+  const historyK = document.createElement("div");
+  historyK.className = "k";
+  historyK.textContent = "Linked care circle history";
+  const historyV = document.createElement("div");
+  historyV.className = "v";
+  historyV.textContent = linkedText;
+  historyRow.appendChild(historyK);
+  historyRow.appendChild(historyV);
+  contextWrap.appendChild(historyRow);
+
+  const policyRow = document.createElement("div");
+  policyRow.className = "field";
+  const policyK = document.createElement("div");
+  policyK.className = "k";
+  policyK.textContent = "Policy files read";
+  const policyV = document.createElement("div");
+  policyV.className = "v";
+  POLICY_FILES.forEach(p => {
+    const chip = document.createElement("span");
+    chip.className = "chip cite";
+    chip.textContent = p.name;
+    chip.style.marginRight = "var(--sp-1)";
+    chip.style.marginBottom = "var(--sp-1)";
+    policyV.appendChild(chip);
+  });
+  policyRow.appendChild(policyK);
+  policyRow.appendChild(policyV);
+  contextWrap.appendChild(policyRow);
+
+  detail.appendChild(contextWrap);
+
+  const runBtn = document.createElement("button");
+  runBtn.className = "btn primary";
+  runBtn.style.marginTop = "var(--sp-4)";
+  runBtn.textContent = "Run";
+  runBtn.addEventListener("click", () => runCase(ev.event_id));
+  detail.appendChild(runBtn);
+
+  container.appendChild(detail);
+
+  const resultHolder = document.createElement("div");
+  resultHolder.id = "main-result-holder";
+  resultHolder.style.marginTop = "var(--sp-4)";
+  container.appendChild(resultHolder);
+
+  const result = CASE_RESULTS[SELECTED_EVENT_ID];
+  if (result) {
+    renderAgentResult(resultHolder, result.rawText, SELECTED_EVENT_ID);
+  } else {
+    resultHolder.textContent = "(not run yet)";
+  }
+}
+
+// ---- render helpers for the result area under the selected case ----
+function setThinking(container) {
+  container.innerHTML = "";
+  const span = document.createElement("span");
+  span.className = "thinking";
+  span.textContent = "Running...";
+  container.appendChild(span);
+}
+
+function setResultError(container, text) {
+  container.innerHTML = "";
+  const note = document.createElement("div");
+  note.className = "error-note";
+  note.textContent = text;
+  container.appendChild(note);
+}
+
+// ---- human gate + run log (Prompt 07) ----
+const CASE_RESULTS = {}; // eventId -> { rawText, parsed, draftText }
+const RUN_LOG = [];      // { timestamp, eventId, decision, humanAction, detail }
+
+function storeCaseResult(eventId, rawText) {
+  const parsed = parseAgentOutput(rawText);
+  CASE_RESULTS[eventId] = {
+    rawText,
+    parsed,
+    draftText: parsed ? (parsed.DRAFT_MESSAGE || "") : rawText
+  };
+  return parsed;
+}
+
+function summarizeDecision(eventId) {
+  const result = CASE_RESULTS[eventId];
+  if (!result) return "(no result)";
+  const source = result.parsed
+    ? `${result.parsed.STATUS || "(no status)"} — ${result.parsed.SUGGESTION_MESSAGE || ""}`
+    : `(unparsed output) ${result.rawText}`;
+  return source.length > 90 ? source.slice(0, 90) + "..." : source;
+}
+
+function logAction(eventId, humanAction, detail) {
+  RUN_LOG.push({
+    timestamp: new Date().toLocaleString(),
+    eventId,
+    decision: summarizeDecision(eventId),
+    humanAction,
+    detail: detail || ""
+  });
+  renderRunLog();
+}
+
+function renderRunLog() {
+  const container = document.getElementById("run-log");
+  container.innerHTML = "";
+
+  if (RUN_LOG.length === 0) {
+    container.textContent = "No runs logged yet.";
+    return;
+  }
+
+  [...RUN_LOG].reverse().forEach(entry => {
+    const row = document.createElement("div");
+    row.className = "row";
+
+    const t = document.createElement("span");
+    t.className = "t";
+    t.textContent = entry.timestamp;
+    row.appendChild(t);
+
+    const rest = document.createElement("span");
+    rest.appendChild(document.createTextNode(`${entry.eventId} — ${entry.decision} — `));
+
+    const actionClass = entry.humanAction === "Approved" ? "action-approve"
+      : entry.humanAction === "Edited" ? "action-edit"
+      : entry.humanAction === "Escalated" ? "action-escalate"
+      : "";
+    const actionSpan = document.createElement("span");
+    if (actionClass) actionSpan.className = actionClass;
+    actionSpan.textContent = entry.humanAction;
+    rest.appendChild(actionSpan);
+
+    if (entry.detail) rest.appendChild(document.createTextNode(` (${entry.detail})`));
+
+    row.appendChild(rest);
+    container.appendChild(row);
+  });
+}
+
+function setGateOutcome(gateContainer, text) {
+  let outcome = gateContainer.querySelector(".gate-outcome");
+  if (!outcome) {
+    outcome = document.createElement("p");
+    outcome.className = "gate-outcome";
+    gateContainer.appendChild(outcome);
+  }
+  outcome.textContent = `Last action: ${text} at ${new Date().toLocaleTimeString()}`;
+}
+
+function renderGate(gateContainer, eventId) {
+  gateContainer.innerHTML = "";
+  gateContainer.style.marginTop = "var(--sp-4)";
+
+  const approveBtn = document.createElement("button");
+  approveBtn.className = "btn primary";
+  approveBtn.textContent = "Approve";
+  approveBtn.addEventListener("click", () => {
+    const result = CASE_RESULTS[eventId];
+    if (result) result.reviewState = "Approved";
+    logAction(eventId, "Approved");
+    setGateOutcome(gateContainer, "Approved");
+    renderCaseList();
+  });
+
+  const editBtn = document.createElement("button");
+  editBtn.className = "btn";
+  editBtn.textContent = "Edit";
+  editBtn.addEventListener("click", () => showEditForm(gateContainer, eventId));
+
+  const escalateBtn = document.createElement("button");
+  escalateBtn.className = "btn danger";
+  escalateBtn.textContent = "Escalate";
+  escalateBtn.addEventListener("click", () => showEscalateForm(gateContainer, eventId));
+
+  gateContainer.appendChild(approveBtn);
+  gateContainer.appendChild(escalateBtn);
+  gateContainer.appendChild(editBtn);
+
+  const outcome = document.createElement("p");
+  outcome.className = "gate-outcome";
+  outcome.textContent = "Not yet reviewed.";
+  gateContainer.appendChild(outcome);
+}
+
+function showEditForm(gateContainer, eventId) {
+  const result = CASE_RESULTS[eventId];
+  if (!result) return;
+
+  gateContainer.innerHTML = "";
+
+  const textarea = document.createElement("textarea");
+  textarea.rows = 4;
+  textarea.cols = 70;
+  textarea.value = result.draftText || "";
+  gateContainer.appendChild(textarea);
+  gateContainer.appendChild(document.createElement("br"));
+
+  const saveBtn = document.createElement("button");
+  saveBtn.className = "btn";
+  saveBtn.textContent = "Save";
+  saveBtn.addEventListener("click", () => {
+    result.draftText = textarea.value;
+    result.reviewState = "Edited";
+    renderGate(gateContainer, eventId);
+    logAction(eventId, "Edited", `New draft: ${textarea.value}`);
+    setGateOutcome(gateContainer, "Edited");
+    renderCaseList();
+  });
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "btn";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.addEventListener("click", () => renderGate(gateContainer, eventId));
+
+  gateContainer.appendChild(saveBtn);
+  gateContainer.appendChild(cancelBtn);
+}
+
+function showEscalateForm(gateContainer, eventId) {
+  gateContainer.innerHTML = "";
+
+  const label = document.createElement("label");
+  label.textContent = "Reason: ";
+  const input = document.createElement("input");
+  input.type = "text";
+  input.size = 50;
+  label.appendChild(input);
+  gateContainer.appendChild(label);
+  gateContainer.appendChild(document.createElement("br"));
+
+  const submitBtn = document.createElement("button");
+  submitBtn.className = "btn danger";
+  submitBtn.textContent = "Submit escalation";
+  submitBtn.addEventListener("click", () => {
+    const reason = input.value.trim() || "(no reason given)";
+    const result = CASE_RESULTS[eventId];
+    if (result) result.reviewState = "Escalated";
+    renderGate(gateContainer, eventId);
+    logAction(eventId, "Escalated", reason);
+    setGateOutcome(gateContainer, `Escalated — ${reason}`);
+    renderCaseList();
+  });
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "btn";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.addEventListener("click", () => renderGate(gateContainer, eventId));
+
+  gateContainer.appendChild(submitBtn);
+  gateContainer.appendChild(cancelBtn);
+}
+
+const DECISION_FIELDS = ["SUGGESTION_MESSAGE", "WHY"];
+const OUTPUT_DISPLAY_FIELDS = ["DRAFT_MESSAGE", "MATCHED_RECIPIENTS", "CITATIONS", "ESCALATION"];
+
+function renderAgentResult(container, rawText, eventId) {
+  const parsed = storeCaseResult(eventId, rawText);
+  container.innerHTML = "";
+
+  if (!parsed) {
+    container.appendChild(stageLabel(3, "Decision"));
+    const note = document.createElement("div");
+    note.className = "error-note";
+    note.textContent = "Notice: agent output did not match the expected format. Showing raw text:\n\n" + rawText;
+    container.appendChild(note);
+  } else {
+    container.appendChild(stageLabel(3, "Decision"));
+
+    const statusValue = parsed.STATUS || "(missing)";
+    const isRefused = statusValue.toUpperCase().indexOf("REFUSED") === 0;
+    const statusBadge = document.createElement("span");
+    statusBadge.className = "badge " + (isRefused ? "danger" : "ok");
+    statusBadge.textContent = statusValue;
+    container.appendChild(statusBadge);
+
+    const decisionWrap = document.createElement("div");
+    decisionWrap.style.marginTop = "var(--sp-3)";
+    DECISION_FIELDS.forEach(field => {
+      if (!(field in parsed)) return;
+      decisionWrap.appendChild(buildFieldRow(field, parsed[field]));
+    });
+    container.appendChild(decisionWrap);
+
+    container.appendChild(stageLabel(4, "Output"));
+    const outputWrap = document.createElement("div");
+    OUTPUT_DISPLAY_FIELDS.forEach(field => {
+      if (!(field in parsed)) return;
+      outputWrap.appendChild(buildFieldRow(field, parsed[field]));
+    });
+    container.appendChild(outputWrap);
+  }
+
+  container.appendChild(stageLabel(5, "Review"));
+
+  const boundary = document.createElement("div");
+  boundary.className = "boundary-note";
+  boundary.textContent = "Nothing is sent without human approval.";
+  container.appendChild(boundary);
+
+  const gateContainer = document.createElement("div");
+  gateContainer.className = "gate";
+  container.appendChild(gateContainer);
+  renderGate(gateContainer, eventId);
+}
+
+// ---- run a case: call the Anthropic Messages API directly from the browser ----
+// Returns an outcome string for the Run All summary: "OK", "REFUSED-ESCALATE", or "ERROR".
+async function runCase(eventId) {
+  const apiKey = localStorage.getItem(API_KEY_STORAGE_KEY);
+
+  function liveContainer() {
+    return SELECTED_EVENT_ID === eventId ? document.getElementById("main-result-holder") : null;
+  }
+
+  if (!apiKey) {
+    const c = liveContainer();
+    if (c) setResultError(c, "No API key saved yet — add your Anthropic API key in Settings below, then try again.");
+    return "ERROR";
+  }
+
+  const event = HEALTH_EVENTS.find(e => e.event_id === eventId);
+  const linkedHistory = CARE_CIRCLE_HISTORY.filter(h => h.event_id === eventId);
+  const userContent = buildUserContent(event, linkedHistory);
+
+  const runningContainer = liveContainer();
+  if (runningContainer) setThinking(runningContainer);
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "x-api-key": apiKey,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true",
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 1024,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: "user", content: userContent }]
+      })
+    });
+
+    const raw = await response.text();
+
+    if (!response.ok) {
+      let friendly = `API error (HTTP ${response.status}).`;
+      try {
+        const errJson = JSON.parse(raw);
+        const type = errJson.error && errJson.error.type;
+        const msg = errJson.error && errJson.error.message;
+        if (type === "authentication_error") friendly = "Bad API key — check what you saved in Settings.";
+        else if (type === "permission_error") friendly = "This API key doesn't have permission for this request.";
+        else if (type === "rate_limit_error") friendly = "Rate limited — wait a moment and try again.";
+        else if (type === "invalid_request_error" && msg && msg.toLowerCase().includes("credit")) friendly = "Your Anthropic account is out of credit.";
+        else if (type === "overloaded_error") friendly = "Anthropic's API is overloaded right now — try again shortly.";
+        else if (msg) friendly = msg;
+      } catch (parseErr) {
+        // raw response wasn't JSON — fall back to the generic HTTP-status message above
+      }
+      const errContainer = liveContainer();
+      if (errContainer) setResultError(errContainer, `${friendly}\n\nRaw response: ${raw}`);
+      renderCaseList();
+      return "ERROR";
+    }
+
+    const data = JSON.parse(raw);
+    const text = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : raw;
+
+    const successContainer = liveContainer();
+    let parsed;
+    if (successContainer) {
+      renderAgentResult(successContainer, text, eventId);
+      parsed = CASE_RESULTS[eventId].parsed;
+    } else {
+      parsed = storeCaseResult(eventId, text);
+    }
+    renderCaseList();
+
+    if (!parsed) return "ERROR";
+    const statusValue = (parsed.STATUS || "").toUpperCase();
+    if (statusValue.indexOf("REFUSED") === 0) return "REFUSED-ESCALATE";
+    if (statusValue.indexOf("OK") === 0) return "OK";
+    return "ERROR";
+  } catch (err) {
+    const catchContainer = liveContainer();
+    if (catchContainer) setResultError(catchContainer, `Could not reach the Anthropic API — check your internet connection.\n\nRaw error: ${err.message}`);
+    renderCaseList();
+    return "ERROR";
+  }
+}
+
+// ---- render: roster ----
+function renderRoster() {
+  const container = document.getElementById("roster-list");
+  const table = document.createElement("table");
+  table.className = "data-table";
+
+  const headerRow = document.createElement("tr");
+  ["Name", "Phone", "Email", "Preferred method", "Help type", "Availability pattern"].forEach(text => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    headerRow.appendChild(th);
+  });
+  table.appendChild(headerRow);
+
+  CARE_CIRCLE_ROSTER.forEach(member => {
+    const row = document.createElement("tr");
+    [member.name, member.phone, member.email, member.preferred_method, member.help_type, member.availability_pattern].forEach(text => {
+      const td = document.createElement("td");
+      td.textContent = text;
+      row.appendChild(td);
+    });
+    table.appendChild(row);
+  });
+
+  container.innerHTML = "";
+  const note = document.createElement("p");
+  note.textContent = `${CARE_CIRCLE_ROSTER.length} roster rows loaded (covers ${new Set(CARE_CIRCLE_ROSTER.map(m => m.name)).size} people).`;
+  container.appendChild(note);
+  container.appendChild(table);
+}
+
+// ---- render: policy file names only ----
+function renderPolicies() {
+  const container = document.getElementById("policy-list");
+  const list = document.createElement("ul");
+  POLICY_FILES.forEach(p => {
+    const li = document.createElement("li");
+    li.textContent = `${p.name} (${p.content.length} characters loaded)`;
+    list.appendChild(li);
+  });
+  container.innerHTML = "";
+  container.appendChild(list);
+}
+
+// ---- settings: API key lives in localStorage only, never in this file ----
+const API_KEY_STORAGE_KEY = "careCircleAnthropicApiKey";
+
+function renderKeyStatus() {
+  const status = document.getElementById("key-status");
+  const stored = localStorage.getItem(API_KEY_STORAGE_KEY);
+  status.textContent = stored ? "Key saved." : "No key saved yet.";
+  renderTopbarMeta();
+  renderNoKeyBanner();
+}
+
+function renderTopbarMeta() {
+  const meta = document.getElementById("topbar-meta");
+  const keySaved = !!localStorage.getItem(API_KEY_STORAGE_KEY);
+  meta.textContent = `${HEALTH_EVENTS.length} cases · Key: ${keySaved ? "saved" : "not saved"}`;
+}
+
+// ---- first-run guidance: point to Settings when no key is saved yet (Prompt 15) ----
+function renderNoKeyBanner() {
+  const container = document.getElementById("no-key-banner");
+  container.innerHTML = "";
+
+  const keySaved = !!localStorage.getItem(API_KEY_STORAGE_KEY);
+  if (keySaved) return;
+
+  const banner = document.createElement("div");
+  banner.style.padding = "var(--sp-2) var(--sp-5)";
+  banner.style.background = "color-mix(in srgb, var(--warn) 12%, transparent)";
+  banner.style.borderBottom = "var(--border-w) solid var(--line)";
+  banner.style.color = "var(--warn)";
+  banner.style.fontSize = "var(--fs-1)";
+
+  banner.appendChild(document.createTextNode("No API key saved yet — the agent can't run until you add one. "));
+
+  const link = document.createElement("a");
+  link.href = "#settings-panel";
+  link.textContent = "Go to Settings";
+  link.style.color = "var(--warn)";
+  link.style.fontWeight = "700";
+  banner.appendChild(link);
+
+  container.appendChild(banner);
+}
+
+document.getElementById("save-key-btn").addEventListener("click", () => {
+  const input = document.getElementById("api-key-input");
+  const value = input.value.trim();
+  if (value) {
+    localStorage.setItem(API_KEY_STORAGE_KEY, value);
+  }
+  input.value = "";
+  renderKeyStatus();
+});
+
+document.getElementById("clear-key-btn").addEventListener("click", () => {
+  localStorage.removeItem(API_KEY_STORAGE_KEY);
+  document.getElementById("api-key-input").value = "";
+  renderKeyStatus();
+});
+
+// ---- Run All: sweep every case in sequence, then summarize ----
+async function runAllCases() {
+  const btn = document.getElementById("run-all-btn");
+  const progress = document.getElementById("run-all-progress");
+  const summaryEl = document.getElementById("run-all-summary");
+
+  btn.disabled = true;
+  summaryEl.textContent = "";
+  const counts = { OK: 0, "REFUSED-ESCALATE": 0, ERROR: 0 };
+
+  for (let i = 0; i < HEALTH_EVENTS.length; i++) {
+    const ev = HEALTH_EVENTS[i];
+    progress.textContent = `Running ${i + 1} of ${HEALTH_EVENTS.length} (${ev.event_id})...`;
+    selectCase(ev.event_id);
+    const outcome = await runCase(ev.event_id);
+    counts[outcome] = (counts[outcome] || 0) + 1;
+  }
+
+  progress.textContent = `Done — ${HEALTH_EVENTS.length} cases run.`;
+  summaryEl.textContent = `Summary: ${counts.OK} OK, ${counts["REFUSED-ESCALATE"]} REFUSED-ESCALATE, ${counts.ERROR} errors.`;
+  btn.disabled = false;
+}
+
+document.getElementById("run-all-btn").addEventListener("click", runAllCases);
+
+// ---- view switcher: Console vs Evals (Prompt 16) ----
+function showView(view) {
+  document.getElementById("console-view").style.display = view === "console" ? "" : "none";
+  document.getElementById("evals-view").style.display = view === "evals" ? "" : "none";
+  document.getElementById("tab-console").className = "btn" + (view === "console" ? " primary" : "");
+  document.getElementById("tab-evals").className = "btn" + (view === "evals" ? " primary" : "");
+  if (view === "evals") refreshEvalsActuals();
+}
+document.getElementById("tab-console").addEventListener("click", () => showView("console"));
+document.getElementById("tab-evals").addEventListener("click", () => showView("evals"));
+
+// ---- Evals table: Case / Expected behavior / Actual / Verdict / Run (Prompt 16) ----
+function summarizeForEval(result) {
+  if (!result) return "(not run yet)";
+  if (!result.parsed) return `(unparsed output) ${result.rawText}`;
+  const p = result.parsed;
+  const parts = [`STATUS: ${p.STATUS || "(missing)"}`];
+  if (p.SUGGESTION_MESSAGE) parts.push(`Suggestion: ${p.SUGGESTION_MESSAGE}`);
+  if (p.MATCHED_RECIPIENTS) parts.push(`Matched: ${p.MATCHED_RECIPIENTS}`);
+  if (p.DRAFT_MESSAGE) parts.push(`Draft: ${p.DRAFT_MESSAGE}`);
+  if (p.ESCALATION) parts.push(`Escalation: ${p.ESCALATION}`);
+  return parts.join(" | ");
+}
+
+async function runEvalRow(caseId) {
+  const ec = EVAL_CASES.find(e => e.case_id === caseId);
+  const actualCell = document.getElementById(`eval-actual-${caseId}`);
+  actualCell.innerHTML = "";
+  const thinking = document.createElement("span");
+  thinking.className = "thinking";
+  thinking.textContent = "Running...";
+  actualCell.appendChild(thinking);
+
+  await runCase(ec.event_id);
+
+  actualCell.textContent = summarizeForEval(CASE_RESULTS[ec.event_id]);
+}
+
+// ---- persist human verdicts + notes across reloads (Prompt 17) ----
+const EVAL_RESULTS_STORAGE_KEY = "careCircleEvalResults";
+
+function loadEvalResults() {
+  try {
+    return JSON.parse(localStorage.getItem(EVAL_RESULTS_STORAGE_KEY)) || {};
+  } catch (e) {
+    return {};
+  }
+}
+
+function saveEvalResult(caseId, field, value) {
+  const all = loadEvalResults();
+  all[caseId] = all[caseId] || {};
+  all[caseId][field] = value;
+  const now = new Date();
+  all[caseId].judgedAt = now.toLocaleDateString();
+  all[caseId].judgedAtMs = now.getTime();
+  localStorage.setItem(EVAL_RESULTS_STORAGE_KEY, JSON.stringify(all));
+  renderScoreboard();
+}
+
+// ---- improvement card: before/change/after, evidence that stays visible (Prompt 19) ----
+const IMPROVEMENT_CARD = {
+  before: "EVAL-04 (Deferral) originally used a phrasing that handed the agent the needs for free (\"it'll probably be groceries and a ride home\"), so it could never actually prove Trigger 4 worked. Rewritten harder — no \"check back later\" phrase, no stated needs — it surfaced a real defect: in 1 of 3 test runs, the agent invented specific help types (meals, groceries, a ride) and previewed Care Circle availability for them, even though the user hadn't mentioned any need. Re-verifying EVAL-03 (No match) in the same pass found a second defect: the no-match status was stated only in internal reasoning (WHY), never in the user-facing suggestion; the ask-anyway draft was sometimes written before the user confirmed; and on one run the agent miscalculated the day of week (said Monday, was actually Tuesday). Re-verifying EVAL-01 (Happy path) — the case the whole demo leans on — found the most consequential defect of the three: it dropped Groceries as a suggested help type in 2 of 4 runs, even though the PRD names Meals and Groceries together as the target for a wrist/hand injury.",
+  change: "Tightened Trigger 4 in escalation_policy.md and the SYSTEM_PROMPT ESCALATION section: when deferring, the agent must say plainly if no need was stated and must not name or preview help types it wasn't given. Tightened Trigger 3 the same way: the no-match disclosure must appear in the user-facing suggestion, not just internal reasoning, and the ask-anyway draft must stay blank until the user explicitly confirms — asking and answering its own question doesn't count. Stopped asking the model to calculate the day of week at all: it's now computed in JavaScript from the event date and passed into the agent's context as a stated fact. And clarified help_policy.md section 4: \"implies\" a help type includes clear functional consequences of the injury, not only types the description names outright — with the hand/wrist/arm injury implying both Meals and Groceries given as a worked example, since that specific connection was the one the model was inconsistently inferring on its own.",
+  after: "EVAL-04 held correct across 4 re-runs: acknowledges the wait, states plainly that no needs were mentioned, invents nothing. EVAL-03 held correct across 4 re-runs: plain no-match disclosure in the suggestion, no premature draft, correct weekday every time. EVAL-01 held correct across 5 re-runs: both Meals and Groceries suggested every time, with the full match set (Sydney Adamu for Meals; Tina Marrero and Neil Fak for Groceries). All three verdicts updated to Pass. EVAL-02 and EVAL-05 were re-run to confirm none of the three fixes caused a regression — both still pass."
+};
+
+function renderImprovementCard() {
+  const container = document.getElementById("improvement-body");
+  if (!container) return;
+  container.innerHTML = "";
+  [["Before", IMPROVEMENT_CARD.before], ["Change", IMPROVEMENT_CARD.change], ["After", IMPROVEMENT_CARD.after]].forEach(([label, text]) => {
+    const field = document.createElement("div");
+    field.className = "field";
+    const k = document.createElement("div");
+    k.className = "k";
+    k.textContent = label;
+    const v = document.createElement("div");
+    v.className = "v";
+    v.textContent = text;
+    field.appendChild(k);
+    field.appendChild(v);
+    container.appendChild(field);
+  });
+}
+
+// ---- known limitations: specific, honest, no marketing language (Prompt 20) ----
+const KNOWN_LIMITATIONS = [
+  "Single-shot per case, no real multi-turn conversation or timed resume. A deferral (Trigger 4) is judged on whether the agent correctly declines to act now — not on an actual follow-up call two hours later, which this prototype cannot do.",
+  "Model output is not fully deterministic. The same case can behave differently on different runs — confirmed directly in this build: EVAL-04 needed 3 runs to catch an intermittent invented-need bug, and EVAL-03 needed 4 re-runs to confirm a fix actually held.",
+  "Scope is limited to hospital, ER, urgent care, and short-term rehab events per help_policy.md section 1. It does not coordinate ongoing chronic care, outpatient visits, or non-medical caregiving requests.",
+  "The Care Circle roster is fixed for this prototype. There is no in-app way to add, remove, or update a member's help type or availability — registering a new person is explicitly out of scope for v1.",
+  "Nothing actually sends. Approving a draft logs the action and displays the message in the run log — there is no real text or email delivery to the recipient."
+];
+
+function renderKnownLimitations() {
+  const container = document.getElementById("limitations-body");
+  if (!container) return;
+  container.innerHTML = "";
+  const list = document.createElement("ul");
+  list.className = "limitations-list";
+  KNOWN_LIMITATIONS.forEach(text => {
+    const li = document.createElement("li");
+    li.textContent = text;
+    list.appendChild(li);
+  });
+  container.appendChild(list);
+}
+
+// ---- scoreboard: Pass / Needs work / Fail counts, evidence that stays visible (Prompt 18) ----
+function renderScoreboard() {
+  const container = document.getElementById("evals-scoreboard");
+  if (!container) return;
+  const saved = loadEvalResults();
+
+  let pass = 0, needsWork = 0, fail = 0, judged = 0, lastRunMs = null, lastRunLabel = "—";
+
+  EVAL_CASES.forEach(ec => {
+    const r = saved[ec.case_id];
+    if (!r || !r.verdict) return;
+    judged++;
+    if (r.verdict === "Pass") pass++;
+    else if (r.verdict === "Needs work") needsWork++;
+    else if (r.verdict === "Fail") fail++;
+    if (r.judgedAtMs && (!lastRunMs || r.judgedAtMs > lastRunMs)) {
+      lastRunMs = r.judgedAtMs;
+      lastRunLabel = r.judgedAt;
+    }
+  });
+
+  const stats = [
+    { n: pass, l: "Pass", cls: "ok" },
+    { n: needsWork, l: "Needs work", cls: "warn" },
+    { n: fail, l: "Fail", cls: "danger" },
+    { n: `${judged}/${EVAL_CASES.length}`, l: "Cases judged", cls: "" },
+    { n: lastRunLabel, l: "Last judged", cls: "" }
+  ];
+
+  container.innerHTML = "";
+  stats.forEach(s => {
+    const stat = document.createElement("div");
+    stat.className = "stat" + (s.cls ? " " + s.cls : "");
+    const n = document.createElement("div");
+    n.className = "n";
+    n.textContent = s.n;
+    const l = document.createElement("div");
+    l.className = "l";
+    l.textContent = s.l;
+    stat.appendChild(n);
+    stat.appendChild(l);
+    container.appendChild(stat);
+  });
+}
+
+// Pulls the latest Actual summary from CASE_RESULTS for every eval case —
+// covers running a case via the console Run button or Run All, not just
+// the per-row Evals Run button.
+function refreshEvalsActuals() {
+  EVAL_CASES.forEach(ec => {
+    const cell = document.getElementById(`eval-actual-${ec.case_id}`);
+    if (!cell) return;
+    const result = CASE_RESULTS[ec.event_id];
+    if (result) cell.textContent = summarizeForEval(result);
+  });
+}
+
+function renderEvalsTable() {
+  const container = document.getElementById("evals-table-wrap");
+  container.innerHTML = "";
+  const saved = loadEvalResults();
+
+  const table = document.createElement("table");
+  table.className = "evals-table";
+
+  const headerRow = document.createElement("tr");
+  ["Case", "Expected behavior", "Actual", "Verdict", "Notes", ""].forEach(text => {
+    const th = document.createElement("th");
+    th.textContent = text;
+    headerRow.appendChild(th);
+  });
+  table.appendChild(headerRow);
+
+  EVAL_CASES.forEach(ec => {
+    const row = document.createElement("tr");
+    const savedResult = saved[ec.case_id] || {};
+
+    const caseTd = document.createElement("td");
+    caseTd.textContent = `${ec.case_id} — ${ec.case_type}`;
+    row.appendChild(caseTd);
+
+    const expectedTd = document.createElement("td");
+    expectedTd.textContent = ec.expected_behavior;
+    row.appendChild(expectedTd);
+
+    const actualTd = document.createElement("td");
+    actualTd.id = `eval-actual-${ec.case_id}`;
+    actualTd.textContent = "(not run yet)";
+    row.appendChild(actualTd);
+
+    const verdictTd = document.createElement("td");
+    const select = document.createElement("select");
+    select.id = `eval-verdict-${ec.case_id}`;
+    ["", "Pass", "Needs work", "Fail"].forEach(opt => {
+      const optionEl = document.createElement("option");
+      optionEl.value = opt;
+      optionEl.textContent = opt || "(unjudged)";
+      select.appendChild(optionEl);
+    });
+    select.value = savedResult.verdict || "";
+    select.addEventListener("change", () => {
+      saveEvalResult(ec.case_id, "verdict", select.value);
+    });
+    verdictTd.appendChild(select);
+    row.appendChild(verdictTd);
+
+    const notesTd = document.createElement("td");
+    const notesInput = document.createElement("input");
+    notesInput.type = "text";
+    notesInput.id = `eval-notes-${ec.case_id}`;
+    notesInput.size = 30;
+    notesInput.placeholder = "One-line note";
+    notesInput.value = savedResult.notes || "";
+    notesInput.addEventListener("change", () => {
+      saveEvalResult(ec.case_id, "notes", notesInput.value);
+    });
+    notesTd.appendChild(notesInput);
+    row.appendChild(notesTd);
+
+    const runTd = document.createElement("td");
+    const runBtn = document.createElement("button");
+    runBtn.className = "btn";
+    runBtn.textContent = "Run";
+    runBtn.addEventListener("click", () => runEvalRow(ec.case_id));
+    runTd.appendChild(runBtn);
+    row.appendChild(runTd);
+
+    table.appendChild(row);
+  });
+
+  container.appendChild(table);
+  refreshEvalsActuals();
+}
+
+renderDemoChips();
+renderCaseList();
+renderMainArea();
+renderRoster();
+renderPolicies();
+renderKeyStatus();
+renderRunLog();
+renderEvalsTable();
+renderScoreboard();
+renderImprovementCard();
+renderKnownLimitations();
+
+</script>
+
+</body>
+</html>

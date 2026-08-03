@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__5f3f75a7-203b-4008-b0c9-c29915b3c857__notion-search",
+      "mcp__5f3f75a7-203b-4008-b0c9-c29915b3c857__notion-fetch",
+      "Bash(grep -n '<div class=\"topbar\">\\\\|</div>\\\\s*$' \"/Users/dhf/Documents/Learning/AI PM Course/agentic-ai-capstone-develop-companion-v0.3/index.html\")",
+      "mcp__5f3f75a7-203b-4008-b0c9-c29915b3c857__notion-create-pages",
+      "Bash(git add *)"
+    ]
+  }
+}

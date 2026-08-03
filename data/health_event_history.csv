@@ -1,0 +1,15 @@
+event_id,date_logged,logged_by,event_description,reason_category,duration_known,estimated_duration_days,status,help_requested,help_received
+EVT-001,2026-06-02,Patient,"I'm in the ER with a likely wrist fracture.",Injury/ER,No,,New,,
+EVT-002,2026-06-05,Caregiver,"My mom was suddenly having a lot of difficulty walking, and now we're in the ER.",ER visit - unclear,No,,New,,
+EVT-003,2026-06-09,Caregiver,"My husband was just admitted with pneumonia. If anything, I could really use someone to walk our dog today while I'm at the hospital.",Infection/illness,No,,New,,
+EVT-004,2026-06-12,Patient,"I'm in the ER, they're running some tests. I don't want to bug anyone yet -- let's just wait and see what they say.",ER visit/illness,No,,Deferred,,
+EVT-005,2026-06-15,Patient,"I had to call the police. My sister was threatening me with a knife. We're in the psych ward now.",Safety incident,No,,Escalated - out of scope,,
+EVT-006,2026-05-10,Patient,"Scheduled knee replacement surgery this morning.",Scheduled surgery,Yes,3,Resolved,Meals,Meals
+EVT-007,2026-05-14,Patient,"Slipped on the stairs, went to the ER to get checked, nothing broken.",Fall/injury,Yes,0,Resolved,None requested,
+EVT-008,2026-05-20,Caregiver,"Admitted for a UTI that turned into a kidney infection.",Infection/illness,Yes,4,Resolved,"Meals; Groceries",Meals
+EVT-009,2026-05-25,Patient,"Overnight observation after adjusting my Parkinson's medication dosage.",Medication adjustment,Yes,1,Resolved,None requested,
+EVT-010,2026-06-01,Patient,"Scheduled hip surgery, expecting a few days in rehab after.",Scheduled surgery,Yes,5,Resolved,"Transportation; Meals","Transportation; Meals"
+EVT-011,2026-06-07,Patient,"Taken in for an involuntary psychiatric hold after a safety concern at home.",Safety incident,No,,Escalated - out of scope,,
+EVT-012,2026-06-18,Patient,"Fell at home, hip pain, admitted for evaluation, not sure how long yet.",Fall/injury,No,,New,,
+EVT-013,2026-06-20,Patient,"Went to urgent care for the flu, sent home same day, feeling okay.",Illness,Yes,0,Resolved,None - user declined,
+EVT-014,2026-06-22,Patient,"Follow-up rehab stay continuing after the hip surgery.",Scheduled surgery/rehab follow-up,Yes,3,Resolved,Notify family,Notify family
