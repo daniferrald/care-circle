@@ -3,6 +3,7 @@ deploy-companion/
 
 # Develop-phase companion / course scaffolding — not the product
 .claude/
+design/
 03_DEVELOP.md
 AGENTS.md
 CLAUDE.md
